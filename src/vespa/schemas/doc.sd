@@ -1,0 +1,44 @@
+schema doc {
+    document doc {
+        field id type string {
+            indexing: attribute | summary
+        }
+
+        field sourceUrl type string {
+            indexing: attribute | summary
+        }
+
+        field text type string {
+            indexing: index | summary
+        }
+        field semanticVector type tensor<float>(x[384]) {
+            indexing: attribute | summary
+        }
+        field headerVector type tensor<float>(x[384]) {
+            indexing: attribute | summary
+        }
+        field keywords type array<string> {
+            indexing: index | summary
+        }
+    }
+
+    fieldset textFields {
+        fields: text, keywords, sourceUrl
+    }
+
+    fieldset tensorFields {
+        fields: semanticVector, headerVector
+    }
+
+    rank-profile hybrid inherits default {
+        inputs {
+            query(queryVector) tensor<float>(x[384])
+        }
+        first-phase {
+            expression: bm25(text) + bm25(keywords)
+        }
+        second-phase {
+            expression: closeness(field, semanticVector)
+        }
+    }
+}

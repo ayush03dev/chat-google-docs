@@ -1,0 +1,13 @@
+version: '3'
+services:
+  vespa:
+    image: vespaengine/vespa
+    container_name: vespa
+    hostname: vespa
+    ports:
+      - "8080:8080"
+      - "19071:19071"
+    environment:
+      - VESPA_CONFIGSERVERS=vespa
+    volumes:
+      - ./src/vespa:/vespa

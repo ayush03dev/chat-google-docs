@@ -1,0 +1,5 @@
+<deployment version="1.0">
+  <instance id="default">
+    <prod />
+  </instance>
+</deployment>
