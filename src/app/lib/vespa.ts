@@ -1,6 +1,6 @@
 import { Chunk, embedText } from "./embedding";
 
-const VESPA_ENDPOINT = `http://localhost:8080/document/v1/doc/doc/docid/`;
+const VESPA_ENDPOINT = `${process.env.VESPA_URL}/document/v1/doc/doc/docid/`;
 
 export async function indexChunk(chunk: Chunk): Promise<void> {
     await fetch(`${VESPA_ENDPOINT}${chunk.id}`, {
@@ -18,11 +18,10 @@ export async function indexChunk(chunk: Chunk): Promise<void> {
     });
 }
 
-
 export async function hybridSearch(query: string, sourceUrl: string): Promise<string> {
     const queryVector = await embedText(query);
     const keywords = query.toLowerCase().split(/\s+/).slice(0, 5);
-    const res = await fetch('http://localhost:8080/search/', {
+    const res = await fetch(`${process.env.VESPA_URL}/search/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

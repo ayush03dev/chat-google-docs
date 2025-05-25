@@ -1,8 +1,6 @@
-// app/api/resolve-link/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { google } from 'googleapis';
-import { chunkText } from '@/app/lib/chunking';
-import { processChunks } from '@/app/lib/embedding';
+import { chunkText, embedChunks } from '@/app/lib/chunking';
 import { indexChunk } from '@/app/lib/vespa';
 import pLimit from 'p-limit';
 
@@ -39,7 +37,7 @@ export async function POST(req: NextRequest) {
         }
 
         const chunks = chunkText(content);
-        const processed = await processChunks(chunks, link);
+        const processed = await embedChunks(chunks, link);
         const limit = pLimit(5); // max 5 concurrent requests
         await Promise.all(processed.map(chunk => limit(() => indexChunk(chunk))));
         // await Promise.all(processed.map(indexChunk));

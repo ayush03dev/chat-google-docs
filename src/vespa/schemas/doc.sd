@@ -11,12 +11,11 @@ schema doc {
         field text type string {
             indexing: index | summary
         }
+
         field semanticVector type tensor<float>(x[384]) {
             indexing: attribute | summary
         }
-        field headerVector type tensor<float>(x[384]) {
-            indexing: attribute | summary
-        }
+
         field keywords type array<string> {
             indexing: index | summary
         }
@@ -27,7 +26,7 @@ schema doc {
     }
 
     fieldset tensorFields {
-        fields: semanticVector, headerVector
+        fields: semanticVector
     }
 
     rank-profile hybrid inherits default {

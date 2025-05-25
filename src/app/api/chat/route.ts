@@ -1,4 +1,3 @@
-// app/api/chat/route.ts
 import { callAI } from '@/app/lib/llm';
 import { hybridSearch } from '@/app/lib/vespa';
 import { NextResponse } from 'next/server';
@@ -13,14 +12,6 @@ export async function POST(request: Request) {
                 { status: 400 }
             );
         }
-        // let reply = `You said: "${message}".`;
-
-        // if (sourceUrl && typeof sourceUrl === 'string') {
-        //     reply += ` Source URL received: ${sourceUrl}`;
-        // }
-
-        console.log(message);
-        console.log(sourceUrl);
         const context = await hybridSearch(message, sourceUrl);
         const aiResponse = await callAI(context, message);
 
