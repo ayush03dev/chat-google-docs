@@ -1,121 +1,184 @@
-import { useState, useEffect, useRef } from 'react';
-
-type Message = {
-    id: number;
-    sender: 'user' | 'bot';
-    text: string;
-};
+'use client';
+import { useState, useRef, useEffect } from 'react';
 
 export default function ChatPage() {
-    const [messages, setMessages] = useState<Message[]>([]);
+    const [messages, setMessages] = useState<{ role: 'user' | 'bot'; content: string }[]>([]);
     const [input, setInput] = useState('');
+    const [sourceUrl, setSourceUrl] = useState('');
     const [loading, setLoading] = useState(false);
-    const messagesEndRef = useRef<HTMLDivElement>(null);
+    const scrollRef = useRef<HTMLDivElement>(null);
 
-    // Scroll chat to bottom when new messages arrive
     useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [messages]);
+        const savedUrl = sessionStorage.getItem('sourceUrl');
+        if (savedUrl) setSourceUrl(savedUrl);
+    }, []);
 
-    async function handleSend() {
-        if (!input.trim()) return;
+    const handleSend = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!input.trim() || loading) return;
 
-        const userMessage: Message = {
-            id: messages.length,
-            sender: 'user',
-            text: input.trim()
-        };
-
+        const userMessage = { role: 'user', content: input };
         setMessages(prev => [...prev, userMessage]);
         setInput('');
         setLoading(true);
 
-        try {
-            // 1. Search relevant docs from Vespa
-            const searchRes = await fetch('/api/search', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ query: userMessage.text })
-            });
-            const searchData = await searchRes.json();
+        const botReply = await fetch('/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: input, sourceUrl }),
+        })
+            .then(res => res.json())
+            .then(data => data.reply || 'Sorry, something went wrong.')
+            .catch(() => 'Error reaching the LLM.');
 
-            // Extract texts from docs
-            const contextText = searchData.docs.map((doc: any) => doc.text).join('\n\n');
+        setMessages(prev => [...prev, { role: 'bot', content: botReply }]);
+        setLoading(false);
+    };
 
-            // 2. Call LLM API with user query + context
-            const genRes = await fetch('/api/generate', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ query: userMessage.text, context: contextText })
-            });
-            const genData = await genRes.json();
-
-            const botMessage: Message = {
-                id: messages.length + 1,
-                sender: 'bot',
-                text: genData.answer || 'Sorry, I could not find an answer.'
-            };
-
-            setMessages(prev => [...prev, botMessage]);
-        } catch (err) {
-            console.error(err);
-            const errorMessage: Message = {
-                id: messages.length + 1,
-                sender: 'bot',
-                text: 'Oops! Something went wrong.'
-            };
-            setMessages(prev => [...prev, errorMessage]);
-        } finally {
-            setLoading(false);
-        }
-    }
-
-    function handleKeyDown(e: React.KeyboardEvent) {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            handleSend();
-        }
-    }
+    // Auto-scroll to bottom when new message arrives or loading changes
+    useEffect(() => {
+        scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
+    }, [messages, loading]);
 
     return (
-        <div style={{ maxWidth: 600, margin: '2rem auto', display: 'flex', flexDirection: 'column', height: '80vh', border: '1px solid #ccc', borderRadius: 8 }}>
-            <div style={{ flex: 1, overflowY: 'auto', padding: 16 }}>
-                {messages.map(m => (
-                    <div key={m.id} style={{ marginBottom: 12, textAlign: m.sender === 'user' ? 'right' : 'left' }}>
-                        <div style={{
-                            display: 'inline-block',
-                            padding: '8px 12px',
-                            borderRadius: 16,
-                            backgroundColor: m.sender === 'user' ? '#0070f3' : '#eaeaea',
-                            color: m.sender === 'user' ? '#fff' : '#000',
-                            maxWidth: '80%',
-                            whiteSpace: 'pre-wrap',
-                        }}>
-                            {m.text}
-                        </div>
-                    </div>
-                ))}
-                <div ref={messagesEndRef} />
-            </div>
+        <main
+            style={{
+                minHeight: '100vh',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '1rem',
+                background: 'linear-gradient(to bottom right, #60a5fa, #4338ca)',
+            }}
+        >
+            <div
+                style={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    backdropFilter: 'blur(8px)',
+                    borderRadius: '1rem',
+                    boxShadow: '0 10px 25px rgba(0, 0, 0, 0.2)',
+                    padding: '2rem',
+                    maxWidth: '500px',
+                    width: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '1rem',
+                }}
+            >
+                <h1 style={{ fontSize: '1.75rem', fontWeight: 'bold', color: '#1f2937', textAlign: 'center' }}>
+                    💬 Chat Assistant
+                </h1>
 
-            <div style={{ borderTop: '1px solid #ccc', padding: 12 }}>
-                <textarea
-                    rows={2}
-                    value={input}
-                    onChange={e => setInput(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    placeholder="Type your message..."
-                    style={{ width: '100%', resize: 'none', padding: 8, borderRadius: 4, fontSize: 16 }}
-                    disabled={loading}
-                />
-                <button
-                    onClick={handleSend}
-                    disabled={loading || !input.trim()}
-                    style={{ marginTop: 8, padding: '10px 20px', fontSize: 16, cursor: loading ? 'not-allowed' : 'pointer' }}
+                {sourceUrl && (
+                    <a
+                        href={sourceUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                            display: 'block',
+                            textAlign: 'center',
+                            marginBottom: '0.75rem',
+                            color: '#2563eb',
+                            textDecoration: 'underline',
+                            fontSize: '0.875rem',
+                            fontWeight: '500',
+                            cursor: 'pointer',
+                            userSelect: 'none',
+                            transition: 'color 0.2s ease',
+                        }}
+                        onMouseOver={e => (e.currentTarget.style.color = '#1d4ed8')}
+                        onMouseOut={e => (e.currentTarget.style.color = '#2563eb')}
+                    >
+                        Click Here to Open Source Document
+                    </a>
+                )}
+
+                <div
+                    ref={scrollRef}
+                    style={{
+                        height: '300px',
+                        overflowY: 'auto',
+                        padding: '1rem',
+                        backgroundColor: '#f9fafb',
+                        borderRadius: '0.5rem',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.75rem',
+                        fontSize: '1rem',
+                    }}
                 >
-                    {loading ? 'Thinking...' : 'Send'}
-                </button>
+                    {messages.map((msg, index) => (
+                        <div
+                            key={index}
+                            style={{
+                                alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
+                                backgroundColor: msg.role === 'user' ? '#3b82f6' : '#e5e7eb',
+                                color: msg.role === 'user' ? '#fff' : '#111827',
+                                padding: '0.5rem 0.75rem',
+                                borderRadius: '0.75rem',
+                                maxWidth: '80%',
+                                fontStyle: msg.role === 'bot' && loading && index === messages.length - 1 ? 'italic' : 'normal',
+                                opacity: msg.role === 'bot' && loading && index === messages.length - 1 ? 0.7 : 1,
+                            }}
+                        >
+                            {msg.content}
+                        </div>
+                    ))}
+                    {loading && (
+                        <div
+                            style={{
+                                alignSelf: 'flex-start',
+                                backgroundColor: '#e5e7eb',
+                                color: '#111827',
+                                padding: '0.5rem 0.75rem',
+                                borderRadius: '0.75rem',
+                                maxWidth: '80%',
+                                fontStyle: 'italic',
+                                opacity: 0.7,
+                            }}
+                        >
+                            Waiting for response...
+                        </div>
+                    )}
+                </div>
+
+                <form onSubmit={handleSend} style={{ display: 'flex', gap: '0.5rem' }}>
+                    <input
+                        type="text"
+                        placeholder="Type your message..."
+                        value={input}
+                        onChange={e => setInput(e.target.value)}
+                        disabled={loading}
+                        style={{
+                            flex: '1',
+                            padding: '0.75rem',
+                            borderRadius: '0.5rem',
+                            border: '1px solid #d1d5db',
+                            fontSize: '1rem',
+                            outline: 'none',
+                            backgroundColor: loading ? '#f3f4f6' : 'white',
+                        }}
+                    />
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        style={{
+                            backgroundColor: loading ? '#4ade80' : '#16a34a',
+                            color: '#fff',
+                            padding: '0.75rem 1rem',
+                            borderRadius: '0.5rem',
+                            border: 'none',
+                            cursor: loading ? 'not-allowed' : 'pointer',
+                            fontSize: '1rem',
+                            transition: 'background-color 0.3s ease',
+                        }}
+                        onMouseOver={e => !loading && (e.currentTarget.style.backgroundColor = '#15803d')}
+                        onMouseOut={e => !loading && (e.currentTarget.style.backgroundColor = '#16a34a')}
+                    >
+                        Send
+                    </button>
+                </form>
             </div>
-        </div>
+        </main>
     );
 }

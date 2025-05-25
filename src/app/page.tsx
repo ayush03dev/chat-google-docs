@@ -6,15 +6,65 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-400 to-indigo-700 px-4">
-      <div className="bg-white bg-opacity-90 backdrop-blur-md rounded-lg shadow-xl p-10 max-w-sm w-full text-center">
-        <h1 className="text-3xl font-bold mb-4 text-gray-800">Welcome Back</h1>
-        <p className="mb-8 text-gray-600">Sign in to your account to continue</p>
+    <main
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100vh',
+        background: 'linear-gradient(to bottom right, #60a5fa, #4f46e5)', // blue-400 to indigo-700
+        padding: '1rem',
+      }}
+    >
+      <div
+        style={{
+          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+          backdropFilter: 'blur(10px)',
+          borderRadius: '1rem',
+          padding: '2.5rem',
+          maxWidth: '24rem',
+          width: '100%',
+          boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
+          textAlign: 'center',
+        }}
+      >
+        <h1
+          style={{
+            fontSize: '1.875rem',
+            fontWeight: 'bold',
+            marginBottom: '1rem',
+            color: '#1f2937', // gray-800
+          }}
+        >
+          Welcome Back
+        </h1>
+        <p style={{ marginBottom: '2rem', color: '#4b5563' /* gray-600 */ }}>
+          Sign in to your account to continue
+        </p>
         <button
           onClick={handleLogin}
-          className="flex items-center justify-center gap-3 bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 text-white px-6 py-3 rounded-lg text-xl transition"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.75rem',
+            backgroundColor: '#2563eb', // blue-600
+            color: 'white',
+            padding: '0.75rem 1.5rem',
+            fontSize: '1.25rem',
+            borderRadius: '0.5rem',
+            cursor: 'pointer',
+            transition: 'background-color 0.3s',
+            border: 'none',
+            margin: '0 auto'
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.backgroundColor = '#1d4ed8'; // blue-700
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.backgroundColor = '#2563eb'; // blue-600
+          }}
         >
-          <span className="text-2xl">🟢</span> {/* simple emoji as icon */}
           Sign in with Google
         </button>
       </div>
