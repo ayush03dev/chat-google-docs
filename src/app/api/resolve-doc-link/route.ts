@@ -28,10 +28,6 @@ export async function POST(req: NextRequest) {
             const sheet = await getGoogleSheetContent(accessToken, sheetId);
             content = JSON.stringify(sheet.values);
             meta = sheet.range || '';
-        } else if (link.includes('calendar.google.com')) {
-            const events = await getGoogleCalendarEvents(accessToken);
-            content = JSON.stringify(events);
-            meta = `Fetched ${events?.length} events`;
         } else {
             return NextResponse.json({ error: 'Unrecognized link format' }, { status: 400 });
         }
@@ -72,18 +68,4 @@ async function getGoogleSheetContent(accessToken: string, spreadsheetId: string)
         range: 'Sheet1',
     });
     return res.data;
-}
-
-async function getGoogleCalendarEvents(accessToken: string) {
-    const oauth2Client = new google.auth.OAuth2();
-    oauth2Client.setCredentials({ access_token: accessToken });
-
-    const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
-    const res = await calendar.events.list({
-        calendarId: 'primary',
-        maxResults: 10,
-        singleEvents: true,
-        orderBy: 'startTime',
-    });
-    return res.data.items;
 }

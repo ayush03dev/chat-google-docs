@@ -144,7 +144,25 @@ export default function ChatPage() {
                                 opacity: msg.role === 'bot' && loading && index === messages.length - 1 ? 0.7 : 1,
                             }}
                         >
-                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
+                            <ReactMarkdown
+                                remarkPlugins={[remarkGfm]}
+                                components={{
+                                    ul: ({ node, ...props }) => (
+                                        <ul style={{ paddingLeft: '1.5rem', margin: '0.5rem 0' }} {...props} />
+                                    ),
+                                    ol: ({ node, ...props }) => (
+                                        <ol style={{ paddingLeft: '1.5rem', margin: '0.5rem 0' }} {...props} />
+                                    ),
+                                    li: ({ node, ...props }) => (
+                                        <li style={{ marginBottom: '0.25rem' }} {...props} />
+                                    ),
+                                    p: ({ node, ...props }) => (
+                                        <p style={{ margin: 0 }} {...props} />
+                                    ),
+                                }}
+                            >
+                                {msg.content}
+                            </ReactMarkdown>
                         </div>
                     ))}
                     {loading && (
