@@ -1,4 +1,5 @@
-import { Chunk, embedText } from "./embedding";
+import { embedText } from "./embedding";
+import { Chunk } from "./chunking";
 
 const VESPA_ENDPOINT = `${process.env.VESPA_URL}/document/v1/doc/doc/docid/`;
 
