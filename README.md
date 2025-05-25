@@ -88,7 +88,3 @@ npm run dev
 ```
 
 Once running, users can sign in with their Google account and start chatting with their own private or public Google Docs using natural language.
-
----
-
-Let me know if you also want a diagram or architecture flow to include in your documentation.
