@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { google } from 'googleapis';
-import { chunkText, embedChunks } from '@/app/lib/chunking';
-import { indexChunk } from '@/app/lib/vespa';
+import { chunkText, embedChunks } from '@/app/utils/chunking';
+import { indexChunk } from '@/app/utils/vespa';
 import pLimit from 'p-limit';
 
 export async function POST(req: NextRequest) {

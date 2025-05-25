@@ -1,5 +1,5 @@
-import { callAI } from '@/app/lib/llm';
-import { hybridSearch } from '@/app/lib/vespa';
+import { callAI } from '@/app/utils/llm';
+import { hybridSearch } from '@/app/utils/vespa';
 import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
