@@ -28,7 +28,8 @@ It uses Google Docs as a content source, Vespa.ai for vector + keyword hybrid se
    * The top-k results are passed along with the query to DeepSeek AI
    * The model returns a final response, which is shown in the chat
 
----
+## Architecture
+![RAG Chat Assistant Architecture](https://i.ibb.co/5WWZSmms/Screenshot-2025-05-25-at-6-00-03-PM.png)
 
 ## Setup Instructions
 
