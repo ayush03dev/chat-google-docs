@@ -1,4 +1,3 @@
-// app/api/auth/initiate/route.ts
 import { NextRequest } from 'next/server';
 import { google } from 'googleapis';
 

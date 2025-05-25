@@ -1,36 +1,94 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Chat Google Docs
 
-## Getting Started
+A **chat application** that allows users to ask queries based on the contents of a Google Doc using natural language. It combines **Retrieval-Augmented Generation (RAG)** with **Google OAuth** to provide personalized access to both public and private Google Docs.
 
-First, run the development server:
+It uses Google Docs as a content source, Vespa.ai for vector + keyword hybrid search, and DeepSeek AI as the LLM for generating responses.
+
+## Features
+
+* Chat-based interface for querying document content
+* Authenticates users via **Google OAuth** to access private Google Docs
+* Fetches content from public or private Google Docs
+* Chunks the document into sections
+* Embeds chunks using an embedding model
+* Indexes them into **Vespa.ai**
+* Performs hybrid search (BM25 + vector similarity)
+* Uses **DeepSeek AI** to generate contextual and accurate responses from top-ranked results
+
+## How It Works
+
+1. User logs in using **Google OAuth**
+2. The app fetches content from a public or private Google Doc (accessible to the logged-in user)
+3. The document is chunked into manageable sections
+4. Embeddings are generated for each chunk
+5. Chunks are stored in a Vespa index
+6. When the user sends a query:
+
+   * A hybrid search is performed in Vespa (BM25 + vector similarity)
+   * The top-k results are passed along with the query to DeepSeek AI
+   * The model returns a final response, which is shown in the chat
+
+---
+
+## Setup Instructions
+
+### 1. Clone the Repository
+
+### 2. Install Dependencies
+
+```bash
+npm install
+```
+
+### 3. Setup Environment Variables
+
+Copy `.env.sample` to `.env.local`:
+
+```bash
+cp .env.sample .env.local
+```
+
+Then fill in the required keys
+
+---
+
+## Running Vespa Locally
+
+### 4. Install Vespa CLI
+
+Follow the official guide:
+[https://docs.vespa.ai/en/vespa-cli.html](https://docs.vespa.ai/en/vespa-cli.html)
+
+### 5. Start Vespa using Docker
+
+```bash
+docker compose up
+```
+
+Wait for Vespa to fully start up (may take a few minutes).
+
+### 6. Set Vespa CLI Target to Local
+
+```bash
+vespa config set target local
+```
+
+### 7. Deploy Vespa App Schema
+
+```bash
+vespa deploy --target local src/vespa
+```
+
+---
+
+## ▶️ Start the App
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Once running, users can sign in with their Google account and start chatting with their own private or public Google Docs using natural language.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Let me know if you also want a diagram or architecture flow to include in your documentation.

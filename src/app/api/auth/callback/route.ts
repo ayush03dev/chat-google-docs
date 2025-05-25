@@ -1,4 +1,3 @@
-// app/api/auth/callback/route.ts
 import { google } from 'googleapis';
 import { NextRequest, NextResponse } from 'next/server';
 
